@@ -32,8 +32,8 @@ typedef itk::LabelMapToLabelImageFilter<LabelMapType, LabelImageType> LabelMapTo
 typedef itk::OtsuThresholdImageFilter<FloatImageType, LabelImageType> OtsuFilterType;
 typedef itk::AutoCropLabelMapFilter<LabelMapType> AutoCropLabelMapFilterType;
 
-void run(std::string imgPathIn, std::string labelPathIn, std::string imgPathOut, std::string labelPathOut, std::string maskPath)
-//void run(std::string imgPathIn, std::string labelPathIn, std::string imgPathOut, std::string labelPathOut)
+//void run(std::string imgPathIn, std::string labelPathIn, std::string imgPathOut, std::string labelPathOut, std::string maskPath)
+void run(std::string imgPathIn, std::string labelPathIn, std::string imgPathOut, std::string labelPathOut)
 {
 	std::cout << "Cropping " << imgPathIn << std::endl;
 
@@ -42,13 +42,13 @@ void run(std::string imgPathIn, std::string labelPathIn, std::string imgPathOut,
 	imageReader->SetFileName(imgPathIn);
 	imageReader->Update();
 
-	//LabelFileReaderType::Pointer labelReader = LabelFileReaderType::New();
-	//labelReader->SetFileName(labelPathIn);
-	//labelReader->Update();
+	LabelFileReaderType::Pointer labelReader = LabelFileReaderType::New();
+	labelReader->SetFileName(labelPathIn);
+	labelReader->Update();
 
-	LabelFileReaderType::Pointer maskReader = LabelFileReaderType::New();
-	maskReader->SetFileName(maskPath);
-	maskReader->Update();
+	//LabelFileReaderType::Pointer maskReader = LabelFileReaderType::New();
+	//maskReader->SetFileName(maskPath);
+	//maskReader->Update();
 
 	//// otsu threshold for obtaining brain mask
 	//OtsuFilterType::Pointer otsuFilter = OtsuFilterType::New();
@@ -60,7 +60,7 @@ void run(std::string imgPathIn, std::string labelPathIn, std::string imgPathOut,
 	// crop to fit brain
 	LabelImageToLabelMapFilterType::Pointer labelImageToMapConverter = LabelImageToLabelMapFilterType::New();
 	//labelImageToMapConverter->SetInput(otsuFilter->GetOutput());
-	labelImageToMapConverter->SetInput(maskReader->GetOutput());
+	labelImageToMapConverter->SetInput(labelReader->GetOutput());
 	labelImageToMapConverter->Update();
 
 	itk::Size<3> cropBorderSize;
@@ -80,10 +80,10 @@ void run(std::string imgPathIn, std::string labelPathIn, std::string imgPathOut,
 	imgCropper->SetExtractionRegion(autoCropFilter->GetRegion());
 	imgCropper->Update();
 
-	//itk::ExtractImageFilter<LabelImageType, LabelImageType>::Pointer labelCropper = itk::ExtractImageFilter<LabelImageType, LabelImageType>::New();
-	//labelCropper->SetInput(labelReader->GetOutput());
-	//labelCropper->SetExtractionRegion(autoCropFilter->GetRegion());
-	//labelCropper->Update();
+	itk::ExtractImageFilter<LabelImageType, LabelImageType>::Pointer labelCropper = itk::ExtractImageFilter<LabelImageType, LabelImageType>::New();
+	labelCropper->SetInput(labelReader->GetOutput());
+	labelCropper->SetExtractionRegion(autoCropFilter->GetRegion());
+	labelCropper->Update();
 
 	// output
 	ImageFileWriterType::Pointer imageWriter = ImageFileWriterType::New();
@@ -91,10 +91,10 @@ void run(std::string imgPathIn, std::string labelPathIn, std::string imgPathOut,
 	imageWriter->SetInput(imgCropper->GetOutput());
 	imageWriter->Write();
 
-	//LabelFileWriterType::Pointer labelWriter = LabelFileWriterType::New();
-	//labelWriter->SetFileName(labelPathOut);
-	//labelWriter->SetInput(labelCropper->GetOutput());
-	//labelWriter->Write();
+	LabelFileWriterType::Pointer labelWriter = LabelFileWriterType::New();
+	labelWriter->SetFileName(labelPathOut);
+	labelWriter->SetInput(labelCropper->GetOutput());
+	labelWriter->Write();
 
 	std::cout<<"Finish cropping " << imgPathIn << std::endl;
 }
@@ -103,7 +103,7 @@ void run(std::string imgPathIn, std::string labelPathIn, std::string imgPathOut,
 int main()
 {
 	boost::filesystem::path dataFolder("G:/Deep_Learning/lisa-brain/DL_TEST_margin_remove");
-	boost::filesystem::path vesselLabelFolder("G:/Deep_Learning/lisa-brain/DL_TEST_margin_remove");
+	//boost::filesystem::path labelFolder("G:/Deep_Learning/lisa-brain/DL_TEST_margin_remove");
 	boost::filesystem::path outputFolder("G:/Deep_Learning/lisa-brain/DL_TEST_margin_remove");
 	std::cout << "Files in " << dataFolder << std::endl;
 
@@ -135,11 +135,10 @@ int main()
 		boost::filesystem::path imgFileIn("FLAIR_brain_norm.nii.gz");
 		boost::filesystem::path imgPathIn = px / imgFileIn;
 
-		boost::filesystem::path maskFile("FLAIR_DilatedVentricle.nii.gz");
-		boost::filesystem::path maskPath = px / maskFile;
+		//boost::filesystem::path maskFile("FLAIR_DilatedVentricle.nii.gz");
+		//boost::filesystem::path maskPath = px / maskFile;
 
 		boost::filesystem::path labelFileIn("label.nii.gz");
-		//boost::filesystem::path labelPathIn = vesselLabelFolder / py / labelFileIn;
 		boost::filesystem::path labelPathIn = px / labelFileIn;
 
 		boost::filesystem::create_directory(outputFolder / py);
@@ -153,7 +152,8 @@ int main()
 		//std::cout << imgPathIn << "\n";
 
 		// asssign task to thread pool
-		ioService.post(boost::bind(run, imgPathIn.string(), labelPathIn.string(), imgPathOut.string(), labelPathOut.string(), maskPath.string()));
+		ioService.post(boost::bind(run, imgPathIn.string(), labelPathIn.string(), imgPathOut.string(), labelPathOut.string()));
+		//ioService.post(boost::bind(run, imgPathIn.string(), labelPathIn.string(), imgPathOut.string(), labelPathOut.string(), maskPath.string()));
 	}
 
 	// stop ioService processing loop. No new task can add to thread pool after this point
