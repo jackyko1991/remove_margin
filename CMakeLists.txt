@@ -15,4 +15,4 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 
 add_executable(MarginCrop main.cpp )
 
-target_link_libraries(MarginCrop ${ITK_LIBRARIES} ${Boost_FILESYSTEM_LIBRARIES} ${Boost_SYSTEM_LIBRARIES} Boost::thread)
+target_link_libraries(MarginCrop ${ITK_LIBRARIES} ${Boost_LIBRARIES})
