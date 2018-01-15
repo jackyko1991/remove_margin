@@ -102,9 +102,9 @@ void run(std::string imgPathIn, std::string labelPathIn, std::string imgPathOut,
 
 int main()
 {
-	boost::filesystem::path dataFolder("G:/Deep_Learning/lisa-brain/DL_TEST_margin_remove");
+	boost::filesystem::path dataFolder("G:/Deep_Learning/lisa-brain/testing/ventricle_and_vessel/testing");
 	//boost::filesystem::path labelFolder("G:/Deep_Learning/lisa-brain/DL_TEST_margin_remove");
-	boost::filesystem::path outputFolder("G:/Deep_Learning/lisa-brain/DL_TEST_margin_remove");
+	boost::filesystem::path outputFolder("G:/Deep_Learning/lisa-brain/testing/cropped/testing");
 	std::cout << "Files in " << dataFolder << std::endl;
 
 	std::vector<boost::thread *> threads;
@@ -138,7 +138,7 @@ int main()
 		//boost::filesystem::path maskFile("FLAIR_DilatedVentricle.nii.gz");
 		//boost::filesystem::path maskPath = px / maskFile;
 
-		boost::filesystem::path labelFileIn("label.nii.gz");
+		boost::filesystem::path labelFileIn("FLAIR_ventricle_D.nii.gz");
 		boost::filesystem::path labelPathIn = px / labelFileIn;
 
 		boost::filesystem::create_directory(outputFolder / py);
