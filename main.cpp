@@ -2,6 +2,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
@@ -13,7 +14,12 @@ int main(int argc, char* argv[])
 			("help,h", "Print help")
 			("input,i", boost::program_options::value<boost::filesystem::path>()->default_value("./input"), "Input data directory")
 			("output,o", boost::program_options::value<boost::filesystem::path>()->default_value("./output"), "Output data directory")
-			("mask,m", boost::program_options::value<bool>()->default_value(false),"Use mask");
+			("mask,m", boost::program_options::value<bool>()->default_value(false),"Use mask, will override auto computed mask")
+			("image-name", boost::program_options::value<std::string>()->default_value("image.nii.gz"), "Name of image data")
+			("label-name", boost::program_options::value<std::string>()->default_value("label.nii.gz"), "Name of label data")
+			("mask-name", boost::program_options::value<std::string>()->default_value("mask.nii.gz"), "Name of mask data")
+			("margin", boost::program_options::value<unsigned int>()->default_value(0), "Set cropping margin")
+			;
 
 		boost::program_options::variables_map variableMap;
 		boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), variableMap);
@@ -42,7 +48,32 @@ int main(int argc, char* argv[])
 			else
 				return 1;
 
-			//std::cout << variableMap["input"].as<boost::filesystem::path>().string() << std::endl;
+			if (variableMap.count("mask"))
+			{
+				removeMargin.SetUseMask(variableMap["mask"].as<bool>());
+			}
+
+			if (variableMap.count("image-name"))
+			{
+				removeMargin.SetImageName(variableMap["image-name"].as<std::string>());
+			}
+
+			if (variableMap.count("label-name"))
+			{
+				removeMargin.SetLabelName(variableMap["label-name"].as<std::string>());
+			}
+
+			if (variableMap.count("mask-name"))
+			{
+				removeMargin.SetMaskName(variableMap["mask-name"].as<std::string>());
+			}
+
+			if (variableMap.count("margin"))
+			{
+				removeMargin.SetMargin(variableMap["margin"].as<unsigned int>());
+			}
+
+			removeMargin.Run();
 		}
 			
 
